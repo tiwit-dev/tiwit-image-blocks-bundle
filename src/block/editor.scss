@@ -1,0 +1,22 @@
+/**
+ * #.# Editor Styles
+ *
+ * CSS for just Backend enqueued after style.scss
+ * which makes it higher in priority.
+ */
+
+.wp-block-tiwit-images-bundle-images-zoom{
+
+	.components-icon-button {
+
+		span {
+			display: inline-block;
+			vertical-align: middle;
+			margin-bottom: 3px;
+		}
+
+		.dashicons {
+			margin-right: 0.5em;
+		}
+	}
+}
