@@ -37,7 +37,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 		html: false
 	},
 	attributes: {
-		image: {
+        imgURL: {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'src',
@@ -65,19 +65,20 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 		const { className, attributes, setAttributes } = props
 
 		const onSelectImage = img => {
+
 			setAttributes( {
 				imgID: img.id,
 				imgURL: img.url,
 				imgAlt: img.alt,
 			} );
 		};
-		const onRemoveImage = () => {
-			setAttributes({
-				imgID: null,
-				imgURL: null,
-				imgAlt: null,
-			});
+
+		const imageZoomLoad = () => {
+
+			const event = new Event('tiwit-add-zoom-image' );
+			document.dispatchEvent( event );
 		}
+
 
 		return (
 			<div className={ className }>
@@ -89,7 +90,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 						value={ attributes.imgID }
 						render={ ( { open } ) => (
 								<Button className="components-button components-icon-button button button-large" onClick={ open }>
-									<span class="dashicons dashicons-format-image"></span>
+									<span className="dashicons dashicons-format-image" />
 									<span>{ __( 'Add image' ) }</span>
 								</Button>
 						) }
@@ -97,12 +98,12 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 
 				) : (
 
-					<p className="image-wrapper">
-						<img
-							src={ props.attributes.imgURL }
-							alt={ props.attributes.imgAlt }
-						/>
-					</p>
+					<img
+						src={ attributes.imgURL }
+						alt={ attributes.imgAlt }
+						data-full-url={ attributes.imgURL }
+						onLoad={ imageZoomLoad }
+					/>
 				)}
 
 			</div>
@@ -117,21 +118,14 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 	 *
 	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
 	 */
-	save( { className } ) {
+	save( { className, attributes } ) {
 		return (
 			<div className={ className }>
-				<p>— Hello from the frontend.</p>
-				<p>
-					CGB BLOCK: <code>wood-images-blocks</code> is a new Gutenberg block.
-				</p>
-				<p>
-					It was created via{ ' ' }
-					<code>
-						<a href="https://github.com/ahmadawais/create-guten-block">
-							create-guten-block
-						</a>
-					</code>.
-				</p>
+				<img
+					src={ attributes.imgURL }
+					alt={ attributes.imgAlt }
+					data-full-url={ attributes.imgURL }
+				/>
 			</div>
 		);
 	},

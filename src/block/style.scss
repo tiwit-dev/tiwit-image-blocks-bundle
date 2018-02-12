@@ -4,11 +4,10 @@
  * CSS for both Frontend+Backend.
  */
 
-.wp-block-cgb-block-wood-images-blocks  {
-  background: $red;
-  border: 0.2rem solid $black;
-  color: $black;
-  margin: 0 auto;
-  max-width: 740px;
-  padding: 2rem;
+.wp-block-tiwit-images-bundle-images-zoom{
+	margin-bottom: 1em;
+
+	img {
+		display: block;
+	}
 }
