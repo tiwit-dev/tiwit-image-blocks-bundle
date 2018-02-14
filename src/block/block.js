@@ -10,12 +10,23 @@ import './style.scss';
 import './editor.scss';
 
 const { __ } = wp.i18n;
-const { registerBlockType, MediaUpload } = wp.blocks;
-const { Button } = wp.components;
+
+const {
+	registerBlockType,
+	MediaUpload,
+	BlockControls,
+	BlockAlignmentToolbar,
+} = wp.blocks;
+
+const {
+	Button,
+	IconButton,
+	Toolbar
+} = wp.components;
 
 
 /**
- * Register: aa Gutenberg Block.
+ * Register: a Gutenberg Block.
  *
  * Registers a new block provided a unique name and an object defining its
  * behavior. Once registered, the block is made editor as an option to any
@@ -37,7 +48,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 		html: false
 	},
 	attributes: {
-        imgURL: {
+		imgURL: {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'src',
@@ -51,6 +62,9 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 			source: 'attribute',
 			attribute: 'alt',
 			selector: 'img',
+		},
+		alignment : {
+			type: 'string'
 		}
 	},
 	/**
@@ -62,7 +76,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
 	 */
 	edit: props => {
-		const { className, attributes, setAttributes } = props
+		const { className, attributes, setAttributes, focus } = props
 
 		const onSelectImage = img => {
 
@@ -79,34 +93,64 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 			document.dispatchEvent( event );
 		}
 
+		const updateAlignment = alignment => {
+
+			setAttributes( {
+				alignment: alignment,
+			} );
+		}
 
 		return (
-			<div className={ className }>
-				{ ! attributes.imgID ? (
+				<div className={ className }>
+					{ focus &&
+						<BlockControls key="controls">
+							<BlockAlignmentToolbar
+								value={ attributes.alignment }
+								onChange={ updateAlignment }
+							/>
+							<Toolbar>
+								<MediaUpload
+									onSelect={ onSelectImage }
+									type="image"
+									value={ attributes.imgID }
+									render={ ( { open } ) => (
+										<IconButton
+											onClick={ open }
+											className="components-toolbar__control"
+											label={ __( 'Edit image' ) }
+											icon="edit"
+										/>
+									) }
+								/>
+							</Toolbar>
 
-					<MediaUpload
-						onSelect={ onSelectImage }
-						type="image"
-						value={ attributes.imgID }
-						render={ ( { open } ) => (
+						</BlockControls>
+					}
+					{ ! attributes.imgID ? (
+
+						<MediaUpload
+							onSelect={ onSelectImage }
+							type="image"
+							value={ attributes.imgID }
+							render={ ( { open } ) => (
 								<Button className="components-button components-icon-button button button-large" onClick={ open }>
 									<span className="dashicons dashicons-format-image" />
 									<span>{ __( 'Add image' ) }</span>
 								</Button>
-						) }
-					/>
+							) }
+						/>
 
-				) : (
+					) : (
 
-					<img
-						src={ attributes.imgURL }
-						alt={ attributes.imgAlt }
-						data-full-url={ attributes.imgURL }
-						onLoad={ imageZoomLoad }
-					/>
-				)}
+						<img
+							src={ attributes.imgURL }
+							alt={ attributes.imgAlt }
+							data-full-url={ attributes.imgURL }
+							onLoad={ imageZoomLoad }
+						/>
+					)}
 
-			</div>
+				</div>
 		);
 	},
 
