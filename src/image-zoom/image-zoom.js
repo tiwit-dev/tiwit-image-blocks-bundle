@@ -12,7 +12,6 @@ const {
 	registerBlockType,
 	MediaUpload,
 	BlockControls,
-	BlockAlignmentToolbar,
 	InspectorControls,
 } = wp.blocks;
 
@@ -61,9 +60,6 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 			source: 'attribute',
 			attribute: 'alt',
 			selector: 'img',
-		},
-		alignment : {
-			type: 'string'
 		},
 		eventTrigger :{
 			type: 'string',
@@ -164,10 +160,6 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 					ref = { ( elem ) => { zoomWrapperElement = elem } }>
 					{focus &&
 						<BlockControls key="controls">
-							<BlockAlignmentToolbar
-								value={attributes.alignment}
-								onChange={ ( alignment ) =>  setAttributes( { alignment : alignment } ) }
-							/>
 							<Toolbar>
 								<MediaUpload
 									onSelect={onSelectImage}
