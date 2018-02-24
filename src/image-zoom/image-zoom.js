@@ -5,13 +5,10 @@
  * Simple block, renders and saves the same content without any interactivity.
  */
 
-//  Import CSS.
-import './style.scss';
-import './editor.scss';
-
 const { __ } = wp.i18n;
 
 const {
+	createBlock,
 	registerBlockType,
 	MediaUpload,
 	BlockControls,
@@ -71,6 +68,41 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 		eventTrigger :{
 			type: 'string',
 		}
+	},
+	transforms: {
+		from: [
+			{
+				type: 'block',
+				isMultiBlock: false,
+				blocks: [ 'core/image' ],
+				transform: ( attributes ) => {
+					if ( attributes.id  ) {
+						return createBlock( 'tiwit-images-bundle/images-zoom', {
+							imgURL: attributes.url,
+							imgID: attributes.id,
+							imgAlt: attributes.alt
+						} );
+					}
+					return createBlock( 'tiwit-images-bundle/images-zoom' );
+				},
+			},
+		],
+		to: [
+			{
+				type: 'block',
+				blocks: [ 'core/image' ],
+				transform: ( { imgURL, imgID, imgAlt } ) => {
+					if ( imgID ) {
+						return createBlock( 'core/image', {
+							id: imgID,
+							url: imgURL,
+							alt: imgAlt
+						} );
+					}
+					return createBlock( 'core/image' );
+				},
+			},
+		]
 	},
 	/**
 	 * The edit function describes the structure of your block in the context of the editor.
