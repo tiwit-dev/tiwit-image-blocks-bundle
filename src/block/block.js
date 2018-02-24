@@ -16,12 +16,14 @@ const {
 	MediaUpload,
 	BlockControls,
 	BlockAlignmentToolbar,
+	InspectorControls,
 } = wp.blocks;
 
 const {
 	Button,
 	IconButton,
-	Toolbar
+	Toolbar,
+	SelectControl,
 } = wp.components;
 
 
@@ -65,6 +67,9 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 		},
 		alignment : {
 			type: 'string'
+		},
+		eventTrigger :{
+			type: 'string',
 		}
 	},
 	/**
@@ -76,7 +81,10 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
 	 */
 	edit: props => {
+
 		const { className, attributes, setAttributes, focus } = props
+
+		let zoomWrapperElement = null;
 
 		const onSelectImage = img => {
 
@@ -87,44 +95,75 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 			} );
 		};
 
-		const imageZoomLoad = () => {
+		const dispatchZoomUpdateEvent = function( trigger, fullUrl){
 
-			const event = new Event('tiwit-add-zoom-image' );
-			document.dispatchEvent( event );
+			const detail = {
+				element : zoomWrapperElement,
+				trigger : trigger,
+				fullUrl: fullUrl,
+			}
+			const customEvent = new CustomEvent('tiwit-add-zoom-image', { 'detail' : detail } );
+			document.dispatchEvent( customEvent );
 		}
 
-		const updateAlignment = alignment => {
-
+		const onZoomTriggerChange = trigger => {
 			setAttributes( {
-				alignment: alignment,
+				eventTrigger: trigger
 			} );
+			dispatchZoomUpdateEvent( trigger, attributes.imgURL );
+		};
+
+		// Refresh zoom en every image change on load
+		const imageLoaded = () => {
+			dispatchZoomUpdateEvent( attributes.eventTrigger, attributes.imgURL );
 		}
+
+		const eventTriggerValues = [
+			{ value: 'mouseover', label: __( 'Mouse over' ) },
+			{ value: 'grab', label: __( 'Grab' ) },
+			{ value: 'click', label: __( 'Click' ) },
+			{ value: 'toggle', label: __( 'Toggle' ) }
+		]
+
+		const eventTrigger = attributes.eventTrigger ? attributes.eventTrigger : 'mouseover'
 
 		return (
-				<div className={ className }>
-					{ focus &&
+				<div className={ className }
+					ref = { ( elem ) => { zoomWrapperElement = elem } }>
+					{focus &&
 						<BlockControls key="controls">
 							<BlockAlignmentToolbar
-								value={ attributes.alignment }
-								onChange={ updateAlignment }
+								value={attributes.alignment}
+								onChange={ ( alignment ) =>  setAttributes( { alignment : alignment } ) }
 							/>
 							<Toolbar>
 								<MediaUpload
-									onSelect={ onSelectImage }
+									onSelect={onSelectImage}
 									type="image"
-									value={ attributes.imgID }
-									render={ ( { open } ) => (
+									value={attributes.imgID}
+									render={({open}) => (
 										<IconButton
-											onClick={ open }
+											onClick={open}
 											className="components-toolbar__control"
-											label={ __( 'Edit image' ) }
+											label={__('Edit image')}
 											icon="edit"
 										/>
-									) }
+									)}
 								/>
 							</Toolbar>
 
 						</BlockControls>
+					}
+					{ focus &&
+						<InspectorControls key="inspector">
+							<h2>{ __( 'Image Settings' ) }</h2>
+							<SelectControl
+								label={ __( 'Event trigger' ) }
+								value={ eventTrigger }
+								options={ eventTriggerValues }
+								onChange={ onZoomTriggerChange }
+							/>
+						</InspectorControls>
 					}
 					{ ! attributes.imgID ? (
 
@@ -146,7 +185,8 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 							src={ attributes.imgURL }
 							alt={ attributes.imgAlt }
 							data-full-url={ attributes.imgURL }
-							onLoad={ imageZoomLoad }
+							data-event={ attributes.eventTrigger }
+							onLoad={ imageLoaded }
 						/>
 					)}
 
@@ -168,6 +208,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 				<img
 					src={ attributes.imgURL }
 					alt={ attributes.imgAlt }
+					data-event={ attributes.eventTrigger }
 					data-full-url={ attributes.imgURL }
 				/>
 			</div>

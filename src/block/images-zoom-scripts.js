@@ -1,20 +1,30 @@
 jQuery( function( $ ){
 
-	const imageZoom = function(){
+	const doImageZoom = function( element, trigger, fullUrl ){
 
-		$('.wp-block-tiwit-images-bundle-images-zoom').each( function ( index, element ) {
-			// destroy all zoom
-			$( element ).trigger('zoom.destroy');
+		// destroy all zoom
+		$( element ).trigger('zoom.destroy');
 
-			// Set zoom
-			$( element ).zoom(
-				{
-					url: element.firstChild.dataset.fullUrl
-				});
-		})
-	};
-	imageZoom();
+		const event = trigger ? trigger : 'mouseover';
 
+		// Set zoom
+		$( element ).zoom(
+			{
+				url: fullUrl,
+				on: event
+			});
+	}
 
-	document.addEventListener( 'tiwit-add-zoom-image', imageZoom );
+	// Do zoom on page load
+	$('.wp-block-tiwit-images-bundle-images-zoom').each( function ( index, element ) {
+
+		doImageZoom( element, element.firstChild.dataset.event, element.firstChild.dataset.fullUrl );
+	})
+
+	// Do zoom on custom event
+	document.addEventListener( 'tiwit-add-zoom-image', function( event ){
+
+		const detail = event.detail;
+		doImageZoom( detail.element, detail.trigger, detail.fullUrl );
+	} );
 });
