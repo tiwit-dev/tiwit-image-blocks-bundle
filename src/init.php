@@ -33,8 +33,8 @@ function tiwit_image_blocks_bundle_assets() {
 	);
 
 	// Script
-	wp_enqueue_script( 'tiwit-jquery-zoom', plugins_url( 'src/block/jquery.zoom.min.js', dirname( __FILE__ ) ), array( 'jquery' ), '1.7.20', true );
-	wp_enqueue_script( 'tiwit-images-zoom', plugins_url( 'src/block/images-zoom-scripts.js', dirname( __FILE__ ) ), array( 'tiwit-jquery-zoom' ), '1.0', true );
+	wp_enqueue_script( 'tiwit-jquery-zoom', plugins_url( 'src/image-zoom/jquery.zoom.min.js', dirname( __FILE__ ) ), array( 'jquery' ), '1.7.20', true );
+	wp_enqueue_script( 'tiwit-images-zoom', plugins_url( 'src/image-zoom/images-zoom-scripts.js', dirname( __FILE__ ) ), array( 'tiwit-jquery-zoom' ), '1.0', true );
 }
 
 /**
