@@ -46,16 +46,22 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 		html: false
 	},
 	attributes: {
-		imgURL: {
+		largeUrl: {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'src',
 			selector: 'img',
 		},
-		imgID: {
+		fullUrl: {
+			type: 'string',
+			source: 'attribute',
+			attribute: 'data-full-url',
+			selector: 'img',
+		},
+		id: {
 			type: 'number',
 		},
-		imgAlt: {
+		alt: {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'alt',
@@ -74,9 +80,9 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 				transform: ( attributes ) => {
 					if ( attributes.id  ) {
 						return createBlock( 'tiwit-images-bundle/images-zoom', {
-							imgURL: attributes.url,
-							imgID: attributes.id,
-							imgAlt: attributes.alt
+							largeUrl: attributes.url,
+							id: attributes.id,
+							alt: attributes.alt
 						} );
 					}
 					return createBlock( 'tiwit-images-bundle/images-zoom' );
@@ -87,12 +93,12 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 			{
 				type: 'block',
 				blocks: [ 'core/image' ],
-				transform: ( { imgURL, imgID, imgAlt } ) => {
-					if ( imgID ) {
+				transform: ( { largeUrl, id, alt } ) => {
+					if ( id ) {
 						return createBlock( 'core/image', {
-							id: imgID,
-							url: imgURL,
-							alt: imgAlt
+							id: id,
+							url: largeUrl,
+							alt: alt
 						} );
 					}
 					return createBlock( 'core/image' );
@@ -116,10 +122,13 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 
 		const onSelectImage = img => {
 
+			const largeUrl = img.sizes.large.url ? img.sizes.large.url : img.url
+
 			setAttributes( {
-				imgID: img.id,
-				imgURL: img.url,
-				imgAlt: img.alt,
+				id: img.id,
+				largeUrl: largeUrl,
+				fullUrl: img.url,
+				alt: img.alt,
 			} );
 		};
 
@@ -138,12 +147,12 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 			setAttributes( {
 				eventTrigger: trigger
 			} );
-			dispatchZoomUpdateEvent( trigger, attributes.imgURL );
+			dispatchZoomUpdateEvent( trigger, attributes.fullUrl );
 		};
 
 		// Refresh zoom en every image change on load
 		const imageLoaded = () => {
-			dispatchZoomUpdateEvent( attributes.eventTrigger, attributes.imgURL );
+			dispatchZoomUpdateEvent( attributes.eventTrigger, attributes.fullUrl );
 		}
 
 		const eventTriggerValues = [
@@ -164,7 +173,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 								<MediaUpload
 									onSelect={onSelectImage}
 									type="image"
-									value={attributes.imgID}
+									value={attributes.id}
 									render={({open}) => (
 										<IconButton
 											onClick={open}
@@ -189,12 +198,12 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 							/>
 						</InspectorControls>
 					}
-					{ ! attributes.imgID ? (
+					{ ! attributes.id ? (
 
 						<MediaUpload
 							onSelect={ onSelectImage }
 							type="image"
-							value={ attributes.imgID }
+							value={ attributes.id }
 							render={ ( { open } ) => (
 								<Button className="components-button components-icon-button button button-large" onClick={ open }>
 									<span className="dashicons dashicons-format-image" />
@@ -206,9 +215,9 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 					) : (
 
 						<img
-							src={ attributes.imgURL }
-							alt={ attributes.imgAlt }
-							data-full-url={ attributes.imgURL }
+							src={ attributes.largeUrl }
+							alt={ attributes.alt }
+							data-full-url={ attributes.fullUrl }
 							data-event={ attributes.eventTrigger }
 							onLoad={ imageLoaded }
 						/>
@@ -230,10 +239,10 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 		return (
 			<div className={ className }>
 				<img
-					src={ attributes.imgURL }
-					alt={ attributes.imgAlt }
+					src={ attributes.largeUrl }
+					alt={ attributes.alt }
 					data-event={ attributes.eventTrigger }
-					data-full-url={ attributes.imgURL }
+					data-full-url={ attributes.fullUrl }
 				/>
 			</div>
 		);
