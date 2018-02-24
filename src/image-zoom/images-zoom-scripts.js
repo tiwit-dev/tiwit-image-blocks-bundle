@@ -8,17 +8,19 @@ jQuery( function( $ ){
 		const event = trigger ? trigger : 'mouseover';
 
 		// Set zoom
-		$( element ).zoom(
-			{
+		$( element )
+			.wrap('<span style="display:inline-block" />')
+			.parent()
+			.zoom({
 				url: fullUrl,
 				on: event
 			});
 	}
 
 	// Do zoom on page load
-	$('.wp-block-tiwit-images-bundle-images-zoom').each( function ( index, element ) {
+	$('.wp-block-tiwit-images-bundle-images-zoom img').each( function ( index, element ) {
 
-		doImageZoom( element, element.firstChild.dataset.event, element.firstChild.dataset.fullUrl );
+		doImageZoom( element, element.dataset.event, element.dataset.fullUrl );
 	})
 
 	// Do zoom on custom event

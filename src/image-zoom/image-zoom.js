@@ -5,6 +5,10 @@
  * Simple block, renders and saves the same content without any interactivity.
  */
 
+//  Import CSS.
+import './style.scss';
+import './editor.scss';
+
 const { __ } = wp.i18n;
 
 const {
@@ -13,6 +17,7 @@ const {
 	MediaUpload,
 	BlockControls,
 	InspectorControls,
+	PlainText,
 } = wp.blocks;
 
 const {
@@ -67,6 +72,11 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 			attribute: 'alt',
 			selector: 'img',
 		},
+		caption: {
+			type: 'array',
+			source: 'children',
+			selector: 'figcaption',
+		},
 		eventTrigger :{
 			type: 'string',
 		}
@@ -81,6 +91,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 					if ( attributes.id  ) {
 						return createBlock( 'tiwit-images-bundle/images-zoom', {
 							largeUrl: attributes.url,
+							fullUrl: attributes.url,
 							id: attributes.id,
 							alt: attributes.alt
 						} );
@@ -93,11 +104,11 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 			{
 				type: 'block',
 				blocks: [ 'core/image' ],
-				transform: ( { largeUrl, id, alt } ) => {
+				transform: ( { fullUrl, id, alt } ) => {
 					if ( id ) {
 						return createBlock( 'core/image', {
 							id: id,
-							url: largeUrl,
+							url: fullUrl,
 							alt: alt
 						} );
 					}
@@ -118,24 +129,29 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 
 		const { className, attributes, setAttributes, focus } = props
 
-		let zoomWrapperElement = null;
+		let zoomElement = null
 
 		const onSelectImage = img => {
 
-			const largeUrl = img.sizes.large.url ? img.sizes.large.url : img.url
+			const largeUrl = img.sizes.large ? img.sizes.large.url : img.url
 
-			setAttributes( {
+			let newAttributes = {
 				id: img.id,
 				largeUrl: largeUrl,
 				fullUrl: img.url,
 				alt: img.alt,
-			} );
+			}
+
+			if( img.caption && img.caption != '' ){
+				newAttributes.caption = img.caption
+			}
+			setAttributes( newAttributes );
 		};
 
 		const dispatchZoomUpdateEvent = function( trigger, fullUrl){
 
 			const detail = {
-				element : zoomWrapperElement,
+				element : zoomElement,
 				trigger : trigger,
 				fullUrl: fullUrl,
 			}
@@ -165,8 +181,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 		const eventTrigger = attributes.eventTrigger ? attributes.eventTrigger : 'mouseover'
 
 		return (
-				<div className={ className }
-					ref = { ( elem ) => { zoomWrapperElement = elem } }>
+				<figure className={ className }>
 					{focus &&
 						<BlockControls key="controls">
 							<Toolbar>
@@ -213,17 +228,29 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 						/>
 
 					) : (
-
-						<img
-							src={ attributes.largeUrl }
-							alt={ attributes.alt }
-							data-full-url={ attributes.fullUrl }
-							data-event={ attributes.eventTrigger }
-							onLoad={ imageLoaded }
-						/>
+						<React.Fragment>
+							<img
+								src={ attributes.largeUrl }
+								alt={ attributes.alt }
+								data-full-url={ attributes.fullUrl }
+								data-event={ attributes.eventTrigger }
+								onLoad={ imageLoaded }
+								ref = { ( elem ) => { zoomElement = elem } }
+							/>
+							{ ( attributes.caption && attributes.caption.length > 0 ) || focus ? (
+								<figcaption>
+									<PlainText
+										className="wp-caption"
+										placeholder={ __( 'Write caption…' ) }
+										value={ attributes.caption }
+										onChange={ ( value ) => setAttributes( { caption: value } ) }
+									/>
+								</figcaption>
+								) : null }
+						</React.Fragment>
 					)}
 
-				</div>
+				</figure>
 		);
 	},
 
@@ -237,14 +264,15 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 	 */
 	save( { className, attributes } ) {
 		return (
-			<div className={ className }>
+			<figure className={ className }>
 				<img
 					src={ attributes.largeUrl }
 					alt={ attributes.alt }
-					data-event={ attributes.eventTrigger }
 					data-full-url={ attributes.fullUrl }
+					data-event={ attributes.eventTrigger }
 				/>
-			</div>
+				{ attributes.caption && attributes.caption.length > 0 && <figcaption className="wp-caption">{ attributes.caption }</figcaption> }
+			</figure>
 		);
 	},
 } );
