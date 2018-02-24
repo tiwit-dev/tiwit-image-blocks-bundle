@@ -17,11 +17,11 @@ const {
 	MediaUpload,
 	BlockControls,
 	InspectorControls,
+	ImagePlaceholder,
 	PlainText,
 } = wp.blocks;
 
 const {
-	Button,
 	IconButton,
 	Toolbar,
 	SelectControl,
@@ -133,7 +133,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 
 		const onSelectImage = img => {
 
-			const largeUrl = img.sizes.large ? img.sizes.large.url : img.url
+			const largeUrl = img.sizes && img.sizes.large ? img.sizes.large.url : img.url
 
 			let newAttributes = {
 				id: img.id,
@@ -142,7 +142,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 				alt: img.alt,
 			}
 
-			if( img.caption && img.caption != '' ){
+			if( img.caption && img.caption !== '' ){
 				newAttributes.caption = img.caption
 			}
 			setAttributes( newAttributes );
@@ -215,16 +215,12 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 					}
 					{ ! attributes.id ? (
 
-						<MediaUpload
-							onSelect={ onSelectImage }
-							type="image"
-							value={ attributes.id }
-							render={ ( { open } ) => (
-								<Button className="components-button components-icon-button button button-large" onClick={ open }>
-									<span className="dashicons dashicons-format-image" />
-									<span>{ __( 'Add image' ) }</span>
-								</Button>
-							) }
+						<ImagePlaceholder
+							className={ className }
+							key="image-placeholder"
+							icon="format-image"
+							label={ __( 'Image' ) }
+							onSelectImage={ onSelectImage }
 						/>
 
 					) : (
