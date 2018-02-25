@@ -6,7 +6,7 @@ Allow you to add an image you can zoom in.
 
 Demo with the TwentySeventeen theme :
 
-![Image zoom demo](http://tiwit.io/images/bloc-image-zoom-demo-front.gif)
+![Image zoom demo](http://tiwit.io/images/block-image-zoom-demo-front.gif)
 
 It use the [JQuery Zoom library](http://www.jacklmoore.com/zoom) by Jack Moore.
 
