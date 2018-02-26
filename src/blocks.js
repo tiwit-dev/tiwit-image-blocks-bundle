@@ -10,3 +10,4 @@
  */
 
 import './image-zoom/image-zoom.js';
+import './images-comparison/images-comparison';

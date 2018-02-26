@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Tiwit image blocks bundle
- * Plugin URI: https://github.com/ahmadawais/create-guten-block/
+ * Plugin URI: https://tiwit.io
  * Description: Image blocks bundle
  * Author: ArnaudBan
  * Author URI: https://arnaudban.me
