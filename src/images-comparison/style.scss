@@ -1,9 +1,12 @@
-.wp-block-tiwit-images-bundle-images-comparison {
+.wp-block-tiwit-images-bundle-images-comparison:not(.twentytwenty-container) {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 
+	img,
 	.components-placeholder {
 		flex-basis: 49.5%;
+		width: 49.5%;
 	}
 }
 .wp-block-tiwit-images-bundle-images-comparison-button {
