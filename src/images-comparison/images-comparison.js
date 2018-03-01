@@ -14,7 +14,16 @@ const { Component } = wp.element
 const {
 	ImagePlaceholder,
 	registerBlockType,
-} = wp.blocks;
+	BlockControls,
+	MediaUpload
+} = wp.blocks
+
+const {
+	IconButton,
+	Dashicon,
+	Button,
+	Toolbar
+} = wp.components
 
 
 class ImagesComparison extends Component {
@@ -47,13 +56,42 @@ class ImagesComparison extends Component {
 	}
 
 	render() {
-		const { className, attributes } = this.props
+		const { className, attributes, focus } = this.props
 		const {  firstImageId, secondImageId, firstImageUrl, secondImageUrl } = attributes
 		const classNameFull = firstImageId && secondImageId ? className + ' twentytwenty-container' : className;
 
 		return(
 
 			<div className={classNameFull} ref={ (element) => { this.comparisonElement = element }}>
+				{focus &&
+					<BlockControls key="controls">
+						<Toolbar>
+							<MediaUpload
+								onSelect={ (image ) => this.onSelectImage( image, 'first' ) }
+								type="image"
+								value={attributes.firstImageId}
+								render={({open}) => (
+									<Button className={"components-icon-button " + className + "-button" } onClick={open} >
+										<Dashicon icon="edit"/>
+										<span>{__('Edit first image')}</span>
+									</Button>
+								)}
+							/>
+							<MediaUpload
+								onSelect={ (image ) => this.onSelectImage( image, 'second' ) }
+								type="image"
+								value={attributes.secondImageId}
+								render={({open}) => (
+									<Button className={"components-icon-button " + className + "-button" } onClick={open} >
+										<Dashicon icon="edit"/>
+										<span>{__('Edit second image')}</span>
+									</Button>
+								)}
+							/>
+						</Toolbar>
+
+					</BlockControls>
+				}
 				{ ! firstImageId ?
 					<ImagePlaceholder
 						key="first-image-placeholder"
