@@ -15,14 +15,15 @@ const {
 	ImagePlaceholder,
 	registerBlockType,
 	BlockControls,
+	InspectorControls,
 	MediaUpload
 } = wp.blocks
 
 const {
-	IconButton,
 	Dashicon,
 	Button,
-	Toolbar
+	Toolbar,
+	TextControl
 } = wp.components
 
 
@@ -33,8 +34,12 @@ class ImagesComparison extends Component {
 
 		// Check if wee have two images and if one has change
 		if( this.props.attributes.firstImageUrl && this.props.attributes.secondImageUrl &&
-			( this.props.attributes.firstImageUrl !== prevProps.attributes.firstImageUrl ||
-			this.props.attributes.secondImageUrl !== prevProps.attributes.secondImageUrl )
+			(
+				this.props.attributes.firstImageUrl !== prevProps.attributes.firstImageUrl ||
+				this.props.attributes.secondImageUrl !== prevProps.attributes.secondImageUrl ||
+				this.props.attributes.beforeLabel !== prevProps.attributes.beforeLabel ||
+				this.props.attributes.afterLabel !== prevProps.attributes.afterLabel
+			)
 		){
 
 			const detail = {
@@ -56,13 +61,19 @@ class ImagesComparison extends Component {
 	}
 
 	render() {
-		const { className, attributes, focus } = this.props
+		const { className, attributes, focus, setAttributes } = this.props
 		const {  firstImageId, secondImageId, firstImageUrl, secondImageUrl } = attributes
 		const classNameFull = firstImageId && secondImageId ? className + ' twentytwenty-container' : className;
 
+		const beforeLabel = attributes.beforeLabel ? attributes.beforeLabel : __('Before')
+		const afterLabel = attributes.afterLabel ? attributes.afterLabel : __('After')
+
 		return(
 
-			<div className={classNameFull} ref={ (element) => { this.comparisonElement = element }}>
+			<div className={classNameFull}
+				 ref={ (element) => { this.comparisonElement = element }}
+				 data-before-label={beforeLabel}
+				 data-after-label={afterLabel}>
 				{focus &&
 					<BlockControls key="controls">
 						<Toolbar>
@@ -91,6 +102,22 @@ class ImagesComparison extends Component {
 						</Toolbar>
 
 					</BlockControls>
+				}
+				{ focus &&
+					<InspectorControls key="inspector">
+						<h2>{ __( 'Comparison Settings' ) }</h2>
+						<TextControl
+							label={ __( 'Before label' ) }
+							value={ beforeLabel }
+							onChange={ ( text ) => setAttributes({ beforeLabel: text }) }
+						/>
+						<TextControl
+							label={ __( 'After label' ) }
+							value={ afterLabel }
+							onChange={ ( text ) => setAttributes({ afterLabel: text }) }
+						/>
+
+					</InspectorControls>
 				}
 				{ ! firstImageId ?
 					<ImagePlaceholder
@@ -147,14 +174,22 @@ registerBlockType( 'tiwit-images-bundle/images-comparison', {
 		secondImageId:{
 			type: 'number'
 		},
+		beforeLabel:{
+			source: 'attribute',
+			attribute: 'data-before-label',
+			selector: '.wp-block-tiwit-images-bundle-images-comparison',
+		},
+		afterLabel:{
+			source: 'attribute',
+			attribute: 'data-after-label',
+			selector: '.wp-block-tiwit-images-bundle-images-comparison',
+		},
 		firstImageUrl:{
-			type: 'string',
 			source: 'attribute',
 			attribute: 'src',
 			selector: 'img.first-image',
 		},
 		secondImageUrl:{
-			type: 'string',
 			source: 'attribute',
 			attribute: 'src',
 			selector: 'img.second-image',
@@ -180,8 +215,12 @@ registerBlockType( 'tiwit-images-bundle/images-comparison', {
 	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
 	 */
 	save( { className, attributes } ) {
+
+		const beforeLabel = attributes.beforeLabel ? attributes.beforeLabel : __('Before')
+		const afterLabel = attributes.afterLabel ? attributes.afterLabel : __('After')
+
 		return (
-			<div className={className + ' twentytwenty-container'}>
+			<div className={className + ' twentytwenty-container'} data-before-label={beforeLabel} data-after-label={afterLabel}>
 				<img src={attributes.firstImageUrl} className="first-image" />
 				<img src={attributes.secondImageUrl} className="second-image"/>
 			</div>
