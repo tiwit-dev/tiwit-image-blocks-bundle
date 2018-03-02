@@ -24,6 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'enqueue_block_assets', 'tiwit_image_blocks_bundle_assets' );
 
 function tiwit_image_blocks_bundle_assets() {
+
 	// Styles
 	wp_enqueue_style(
 		'tiwit_images_blocks-cgb-style-css', // Handle.
@@ -31,15 +32,14 @@ function tiwit_image_blocks_bundle_assets() {
 		array( 'wp-blocks' ) // Dependency to include the CSS after it.
 		// filemtime( plugin_dir_path( __FILE__ ) . 'editor.css' ) // Version: filemtime — Gets file modification time.
 	);
+	wp_enqueue_style('tiwit-juxtapose-css', 'https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css', array(), '1.2.0');
 
 	// Script
-	wp_enqueue_script( 'tiwit-jquery-event-move', plugins_url( 'src/libs/jquery.event.move.js', dirname( __FILE__ ) ), array( 'jquery' ), '2.0.0', true );
-	wp_enqueue_script( 'tiwit-jquery-twentytwenty', plugins_url( 'src/libs/jquery.twentytwenty.js', dirname( __FILE__ ) ), array( 'tiwit-jquery-event-move' ), '1.0.0', true );
+	wp_enqueue_script( 'tiwit-juxtapose', 'https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js', array(), '1.2.0', true );
+
+	// Image zoom
 	wp_enqueue_script( 'tiwit-jquery-zoom', plugins_url( 'src/libs/jquery.zoom.min.js', dirname( __FILE__ ) ), array( 'jquery' ), '1.7.20', true );
-
-
 	wp_enqueue_script( 'tiwit-images-zoom', plugins_url( 'src/image-zoom/images-zoom-scripts.js', dirname( __FILE__ ) ), array( 'tiwit-jquery-zoom' ), '1.0', true );
-	wp_enqueue_script( 'tiwit-images-comparison', plugins_url( 'src/images-comparison/images-comparison-scripts.js', dirname( __FILE__ ) ), array( 'imagesloaded', 'tiwit-jquery-twentytwenty' ), '1.0', true );
 }
 
 /**
@@ -56,7 +56,7 @@ function tiwit_images_blocks_cgb_editor_assets() {
 	wp_enqueue_script(
 		'tiwit_images_blocks-cgb-block-js', // Handle.
 		plugins_url( '/dist/blocks.build.js', dirname( __FILE__ ) ), // Block.build.js: We register the block here. Built with Webpack.
-		array( 'wp-blocks', 'wp-i18n', 'wp-element' ) // Dependencies, defined above.
+		array( 'wp-blocks', 'wp-i18n', 'wp-element', 'tiwit-juxtapose' ) // Dependencies, defined above.
 		// filemtime( plugin_dir_path( __FILE__ ) . 'block.js' ) // Version: filemtime — Gets file modification time.
 	);
 

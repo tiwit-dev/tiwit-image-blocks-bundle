@@ -23,11 +23,78 @@ const {
 	Dashicon,
 	Button,
 	Toolbar,
-	TextControl
+	TextControl,
+	SelectControl
 } = wp.components
 
 
 class ImagesComparison extends Component {
+
+	constructor( props ) {
+		super( props );
+
+		this.state = {
+			juxtapose: null
+		}
+
+		this.createSliderFromAttributes = this.createSliderFromAttributes.bind( this )
+	}
+
+	componentDidMount(){
+
+		const { attributes, setAttributes } = this.props
+
+		// Default attributs
+		const defaultAttributes = {}
+		if( ! attributes.beforeLabel ){
+			defaultAttributes.beforeLabel = __('Before')
+		}
+		if( ! attributes.afterLabel ){
+			defaultAttributes.afterLabel = __('After')
+		}
+		if( ! attributes.orientation ){
+			defaultAttributes.orientation = __('horizontal')
+		}
+
+		if( defaultAttributes ){
+			setAttributes( defaultAttributes )
+		}
+
+		if( attributes.firstImageUrl && attributes.secondImageUrl ){
+
+			this.createSliderFromAttributes();
+
+		}
+	}
+
+	createSliderFromAttributes() {
+
+		// Delete everything and rebuild
+		while (this.comparisonElement.firstChild) {
+			this.comparisonElement.removeChild(this.comparisonElement.firstChild);
+		}
+
+		const images = [
+			{
+				src: this.props.attributes.firstImageUrl,
+				label: this.props.attributes.beforeLabel
+			},
+			{
+				src: this.props.attributes.secondImageUrl,
+				label: this.props.attributes.afterLabel,
+			}
+		]
+		const opts = {
+			animate: true,
+			showLabels: true,
+			showCredits: true,
+			startingPosition: "50%",
+			makeResponsive: true,
+			mode: this.props.attributes.orientation
+		}
+
+		window.slider_preview = new juxtapose.JXSlider(".tiwit-" + this.props.id, images, opts);
+	}
 
 
 	componentDidUpdate( prevProps ){
@@ -37,16 +104,14 @@ class ImagesComparison extends Component {
 			(
 				this.props.attributes.firstImageUrl !== prevProps.attributes.firstImageUrl ||
 				this.props.attributes.secondImageUrl !== prevProps.attributes.secondImageUrl ||
+				this.props.attributes.orientation !== prevProps.attributes.orientation ||
 				this.props.attributes.beforeLabel !== prevProps.attributes.beforeLabel ||
 				this.props.attributes.afterLabel !== prevProps.attributes.afterLabel
 			)
 		){
 
-			const detail = {
-				element : this.comparisonElement,
-			}
-			const customEvent = new CustomEvent('tiwit-do-images-comparison', { 'detail' : detail } );
-			document.dispatchEvent( customEvent );
+			this.createSliderFromAttributes();
+
 		}
 	}
 
@@ -61,19 +126,17 @@ class ImagesComparison extends Component {
 	}
 
 	render() {
-		const { className, attributes, focus, setAttributes } = this.props
+		const { id, className, attributes, focus, setAttributes } = this.props
 		const {  firstImageId, secondImageId, firstImageUrl, secondImageUrl } = attributes
-		const classNameFull = firstImageId && secondImageId ? className + ' twentytwenty-container' : className;
+		const classNameFull = firstImageId && secondImageId ? className + ' juxtapose' : className;
 
-		const beforeLabel = attributes.beforeLabel ? attributes.beforeLabel : __('Before')
-		const afterLabel = attributes.afterLabel ? attributes.afterLabel : __('After')
 
 		return(
 
-			<div className={classNameFull}
-				 ref={ (element) => { this.comparisonElement = element }}
-				 data-before-label={beforeLabel}
-				 data-after-label={afterLabel}>
+			<div
+				className={classNameFull + ' tiwit-' + id}
+				ref={ (element) => { this.comparisonElement = element }}
+			>
 				{focus &&
 					<BlockControls key="controls">
 						<Toolbar>
@@ -108,15 +171,23 @@ class ImagesComparison extends Component {
 						<h2>{ __( 'Comparison Settings' ) }</h2>
 						<TextControl
 							label={ __( 'Before label' ) }
-							value={ beforeLabel }
+							value={ attributes.beforeLabel }
 							onChange={ ( text ) => setAttributes({ beforeLabel: text }) }
 						/>
 						<TextControl
 							label={ __( 'After label' ) }
-							value={ afterLabel }
+							value={ attributes.afterLabel }
 							onChange={ ( text ) => setAttributes({ afterLabel: text }) }
 						/>
-
+						<SelectControl
+							label={ __( 'Orientation' ) }
+							value={ attributes.orientation }
+							options={ [
+								{ value: 'horizontal', label: __( 'Horizontal' ) },
+								{ value: 'vertical', label: __( 'Vertical' ) }
+							] }
+							onChange={ ( orientation ) => setAttributes({ orientation: orientation }) }
+						/>
 					</InspectorControls>
 				}
 				{ ! firstImageId ?
@@ -174,15 +245,20 @@ registerBlockType( 'tiwit-images-bundle/images-comparison', {
 		secondImageId:{
 			type: 'number'
 		},
+		orientation:{
+			source: 'attribute',
+			attribute: 'data-mode',
+			selector: '.wp-block-tiwit-images-bundle-images-comparison',
+		},
 		beforeLabel:{
 			source: 'attribute',
-			attribute: 'data-before-label',
-			selector: '.wp-block-tiwit-images-bundle-images-comparison',
+			attribute: 'data-label',
+			selector: 'img.first-image',
 		},
 		afterLabel:{
 			source: 'attribute',
-			attribute: 'data-after-label',
-			selector: '.wp-block-tiwit-images-bundle-images-comparison',
+			attribute: 'data-label',
+			selector: 'img.second-image',
 		},
 		firstImageUrl:{
 			source: 'attribute',
@@ -214,15 +290,19 @@ registerBlockType( 'tiwit-images-bundle/images-comparison', {
 	 *
 	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
 	 */
-	save( { className, attributes } ) {
+	save( { className, attributes, id } ) {
 
 		const beforeLabel = attributes.beforeLabel ? attributes.beforeLabel : __('Before')
 		const afterLabel = attributes.afterLabel ? attributes.afterLabel : __('After')
+		const orientation = attributes.orientation ? attributes.orientation : __('horizontal')
 
 		return (
-			<div className={className + ' twentytwenty-container'} data-before-label={beforeLabel} data-after-label={afterLabel}>
-				<img src={attributes.firstImageUrl} className="first-image" />
-				<img src={attributes.secondImageUrl} className="second-image"/>
+			<div
+				className={className + ' juxtapose tiwit-' + id}
+				data-mode={orientation}
+			>
+				<img src={attributes.firstImageUrl} className="first-image" data-label={beforeLabel} />
+				<img src={attributes.secondImageUrl} className="second-image" data-label={afterLabel}/>
 			</div>
 		);
 	},

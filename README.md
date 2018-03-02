@@ -16,6 +16,6 @@ Add a nice slider to easy compare two images.
 
 ![Image zoom demo](http://tiwit.io/images/block-image-comparison-demo-front.gif)
 
-It use the [jQuery twentytwenty library](https://github.com/zurb/twentytwenty) by Zurb.
+It use the [Juxtapose library](https://github.com/NUKnightLab/juxtapose) by knightlab.
  
 This project was bootstrapped with [Create Guten Block](https://github.com/ahmadawais/create-guten-block).
