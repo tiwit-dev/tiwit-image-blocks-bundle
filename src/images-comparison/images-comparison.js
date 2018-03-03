@@ -24,7 +24,8 @@ const {
 	Button,
 	Toolbar,
 	TextControl,
-	SelectControl
+	SelectControl,
+	CheckboxControl
 } = wp.components
 
 
@@ -38,6 +39,7 @@ class ImagesComparison extends Component {
 		}
 
 		this.createSliderFromAttributes = this.createSliderFromAttributes.bind( this )
+		this.changeShowLabelsCheckbox = this.changeShowLabelsCheckbox.bind( this )
 	}
 
 	componentDidMount(){
@@ -53,7 +55,10 @@ class ImagesComparison extends Component {
 			defaultAttributes.afterLabel = __('After')
 		}
 		if( ! attributes.orientation ){
-			defaultAttributes.orientation = __('horizontal')
+			defaultAttributes.orientation = 'horizontal'
+		}
+		if( ! attributes.showLabels ){
+			defaultAttributes.showLabels = 'true'
 		}
 
 		if( defaultAttributes ){
@@ -86,8 +91,7 @@ class ImagesComparison extends Component {
 		]
 		const opts = {
 			animate: true,
-			showLabels: true,
-			showCredits: true,
+			showLabels: this.props.attributes.showLabels,
 			startingPosition: "50%",
 			makeResponsive: true,
 			mode: this.props.attributes.orientation
@@ -106,7 +110,8 @@ class ImagesComparison extends Component {
 				this.props.attributes.secondImageUrl !== prevProps.attributes.secondImageUrl ||
 				this.props.attributes.orientation !== prevProps.attributes.orientation ||
 				this.props.attributes.beforeLabel !== prevProps.attributes.beforeLabel ||
-				this.props.attributes.afterLabel !== prevProps.attributes.afterLabel
+				this.props.attributes.afterLabel !== prevProps.attributes.afterLabel ||
+				this.props.attributes.showLabels !== prevProps.attributes.showLabels
 			)
 		){
 
@@ -123,6 +128,12 @@ class ImagesComparison extends Component {
 		newAttributes[ witchImage + 'ImageUrl' ] = selectedImage.url
 
 		setAttributes( newAttributes )
+	}
+
+	changeShowLabelsCheckbox( checked )
+	{
+		console.log( checked );
+		this.props.setAttributes({ showLabels: checked ? 'true' : 'false' })
 	}
 
 	render() {
@@ -188,6 +199,12 @@ class ImagesComparison extends Component {
 							] }
 							onChange={ ( orientation ) => setAttributes({ orientation: orientation }) }
 						/>
+						<CheckboxControl
+							label= {__( 'Show labels' )}
+							checked={ attributes.showLabels === 'true' }
+							onChange={ this.changeShowLabelsCheckbox }
+						/>
+
 					</InspectorControls>
 				}
 				{ ! firstImageId ?
@@ -250,6 +267,11 @@ registerBlockType( 'tiwit-images-bundle/images-comparison', {
 			attribute: 'data-mode',
 			selector: '.wp-block-tiwit-images-bundle-images-comparison',
 		},
+		showLabels:{
+			source: 'attribute',
+			attribute: 'data-showlabels',
+			selector: '.wp-block-tiwit-images-bundle-images-comparison',
+		},
 		beforeLabel:{
 			source: 'attribute',
 			attribute: 'data-label',
@@ -294,12 +316,14 @@ registerBlockType( 'tiwit-images-bundle/images-comparison', {
 
 		const beforeLabel = attributes.beforeLabel ? attributes.beforeLabel : __('Before')
 		const afterLabel = attributes.afterLabel ? attributes.afterLabel : __('After')
-		const orientation = attributes.orientation ? attributes.orientation : __('horizontal')
+		const orientation = attributes.orientation ? attributes.orientation : 'horizontal'
+		const showLabels = attributes.showLabels ? attributes.showLabels : 'true'
 
 		return (
 			<div
 				className={className + ' juxtapose tiwit-' + id}
 				data-mode={orientation}
+				data-showlabels={showLabels}
 			>
 				<img src={attributes.firstImageUrl} className="first-image" data-label={beforeLabel} />
 				<img src={attributes.secondImageUrl} className="second-image" data-label={afterLabel}/>
