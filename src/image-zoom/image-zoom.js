@@ -37,6 +37,11 @@ class TiwitImagesZoom extends Component {
 
 		this.onFocusCaption = this.onFocusCaption.bind( this );
 		this.onImageClick = this.onImageClick.bind( this );
+		this.imageLoaded = this.imageLoaded.bind( this );
+		this.onFocusCaption = this.onFocusCaption.bind( this );
+		this.onZoomTriggerChange = this.onZoomTriggerChange.bind( this );
+		this.dispatchZoomUpdateEvent = this.dispatchZoomUpdateEvent.bind( this );
+		this.onSelectImage = this.onSelectImage.bind( this );
 
 		this.state = {
 			captionFocused: false,
@@ -52,9 +57,8 @@ class TiwitImagesZoom extends Component {
 		}
 	}
 
-	onImageClick() {
-		console.log( 'on clique sur limage');
-		if ( this.state.captionFocused ) {
+	onImageClick( event ) {
+		if ( this.zoomElement && event.target.parentElement === this.zoomElement.parentElement && this.state.captionFocused ) {
 			this.setState( {
 				captionFocused: false,
 			} );
@@ -69,52 +73,50 @@ class TiwitImagesZoom extends Component {
 		}
 	}
 
+	dispatchZoomUpdateEvent( trigger, fullUrl){
+
+		const detail = {
+			element : this.zoomElement,
+			trigger : trigger,
+			fullUrl: fullUrl,
+		}
+		const customEvent = new CustomEvent('tiwit-add-zoom-image', { 'detail' : detail } );
+		document.dispatchEvent( customEvent );
+	}
+
+	onZoomTriggerChange( trigger ) {
+		this.props.setAttributes( {
+			eventTrigger: trigger
+		} );
+		this.dispatchZoomUpdateEvent( trigger, this.props.attributes.fullUrl );
+	};
+
+	// Refresh zoom en every image change on load
+	imageLoaded(){
+		this.dispatchZoomUpdateEvent( this.props.attributes.eventTrigger, this.props.attributes.fullUrl );
+	}
+
+	onSelectImage ( img ) {
+
+		const largeUrl = img.sizes && img.sizes.large ? img.sizes.large.url : img.url
+
+		let newAttributes = {
+			id: img.id,
+			largeUrl: largeUrl,
+			fullUrl: img.url,
+			alt: img.alt,
+		}
+
+		if( img.caption && img.caption !== '' ){
+			newAttributes.caption = img.caption
+		}
+		this.props.setAttributes( newAttributes );
+	};
+
 
 	render(){
 
 		const { className, attributes, setAttributes, focus, isSelected } = this.props
-
-		let zoomElement = null
-
-		const onSelectImage = img => {
-
-			const largeUrl = img.sizes && img.sizes.large ? img.sizes.large.url : img.url
-
-			let newAttributes = {
-				id: img.id,
-				largeUrl: largeUrl,
-				fullUrl: img.url,
-				alt: img.alt,
-			}
-
-			if( img.caption && img.caption !== '' ){
-				newAttributes.caption = img.caption
-			}
-			setAttributes( newAttributes );
-		};
-
-		const dispatchZoomUpdateEvent = function( trigger, fullUrl){
-
-			const detail = {
-				element : zoomElement,
-				trigger : trigger,
-				fullUrl: fullUrl,
-			}
-			const customEvent = new CustomEvent('tiwit-add-zoom-image', { 'detail' : detail } );
-			document.dispatchEvent( customEvent );
-		}
-
-		const onZoomTriggerChange = trigger => {
-			setAttributes( {
-				eventTrigger: trigger
-			} );
-			dispatchZoomUpdateEvent( trigger, attributes.fullUrl );
-		};
-
-		// Refresh zoom en every image change on load
-		const imageLoaded = () => {
-			dispatchZoomUpdateEvent( attributes.eventTrigger, attributes.fullUrl );
-		}
 
 		const eventTriggerValues = [
 			{ value: 'mouseover', label: __( 'Mouse over' ) },
@@ -126,12 +128,12 @@ class TiwitImagesZoom extends Component {
 		const eventTrigger = attributes.eventTrigger ? attributes.eventTrigger : 'mouseover'
 
 		return (
-			<figure className={ className }>
+			<figure className={ className } onClick={ this.onImageClick }>
 				{focus &&
 				<BlockControls key="controls">
 					<Toolbar>
 						<MediaUpload
-							onSelect={onSelectImage}
+							onSelect={this.onSelectImage}
 							type="image"
 							value={attributes.id}
 							render={({open}) => (
@@ -154,7 +156,7 @@ class TiwitImagesZoom extends Component {
 						label={ __( 'Event trigger' ) }
 						value={ eventTrigger }
 						options={ eventTriggerValues }
-						onChange={ onZoomTriggerChange }
+						onChange={ this.onZoomTriggerChange }
 					/>
 				</InspectorControls>
 				}
@@ -165,7 +167,7 @@ class TiwitImagesZoom extends Component {
 						key="image-placeholder"
 						icon="format-image"
 						label={ __( 'Image' ) }
-						onSelectImage={ onSelectImage }
+						onSelectImage={ this.onSelectImage }
 					/>
 
 				) : (
@@ -175,9 +177,8 @@ class TiwitImagesZoom extends Component {
 							alt={ attributes.alt }
 							data-full-url={ attributes.fullUrl }
 							data-event={ attributes.eventTrigger }
-							onLoad={ imageLoaded }
-							onClick={ this.onImageClick }
-							ref = { ( elem ) => { zoomElement = elem } }
+							onLoad={ this.imageLoaded }
+							ref = { ( elem ) => { this.zoomElement = elem } }
 						/>
 						{ ( attributes.caption && attributes.caption.length > 0 ) || isSelected ? (
 							<RichText

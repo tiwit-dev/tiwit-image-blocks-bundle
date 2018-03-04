@@ -3,13 +3,18 @@ jQuery( function( $ ){
 	const doImageZoom = function( element, trigger, fullUrl ){
 
 		// destroy all zoom
-		$( element ).trigger('zoom.destroy');
+		const parent = $( element ).parent();
+
+		if( parent[0].classList.contains('tiwit-image-zoom-wrapper') ){
+			parent.trigger('zoom.destroy');
+		} else {
+			$( element ).wrap('<span class="tiwit-image-zoom-wrapper" style="display:inline-block" />');
+		}
 
 		const event = trigger ? trigger : 'mouseover';
 
 		// Set zoom
 		$( element )
-			.wrap('<span style="display:inline-block" />')
 			.parent()
 			.zoom({
 				url: fullUrl,
