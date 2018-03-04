@@ -10,6 +10,8 @@ import './editor.scss';
 
 const { __ } = wp.i18n;
 
+const { Component } = wp.element
+
 const {
 	createBlock,
 	registerBlockType,
@@ -17,7 +19,7 @@ const {
 	BlockControls,
 	InspectorControls,
 	ImagePlaceholder,
-	PlainText,
+	RichText,
 } = wp.blocks;
 
 const {
@@ -26,6 +28,176 @@ const {
 	SelectControl,
 } = wp.components;
 
+
+
+class TiwitImagesZoom extends Component {
+
+	constructor() {
+		super( ...arguments );
+
+		this.onFocusCaption = this.onFocusCaption.bind( this );
+		this.onImageClick = this.onImageClick.bind( this );
+
+		this.state = {
+			captionFocused: false,
+		};
+	}
+
+
+	componentWillReceiveProps( { isSelected } ) {
+		if ( ! isSelected && this.props.isSelected && this.state.captionFocused ) {
+			this.setState( {
+				captionFocused: false,
+			} );
+		}
+	}
+
+	onImageClick() {
+		console.log( 'on clique sur limage');
+		if ( this.state.captionFocused ) {
+			this.setState( {
+				captionFocused: false,
+			} );
+		}
+	}
+
+	onFocusCaption() {
+		if ( ! this.state.captionFocused ) {
+			this.setState( {
+				captionFocused: true,
+			} );
+		}
+	}
+
+
+	render(){
+
+		const { className, attributes, setAttributes, focus, isSelected } = this.props
+
+		let zoomElement = null
+
+		const onSelectImage = img => {
+
+			const largeUrl = img.sizes && img.sizes.large ? img.sizes.large.url : img.url
+
+			let newAttributes = {
+				id: img.id,
+				largeUrl: largeUrl,
+				fullUrl: img.url,
+				alt: img.alt,
+			}
+
+			if( img.caption && img.caption !== '' ){
+				newAttributes.caption = img.caption
+			}
+			setAttributes( newAttributes );
+		};
+
+		const dispatchZoomUpdateEvent = function( trigger, fullUrl){
+
+			const detail = {
+				element : zoomElement,
+				trigger : trigger,
+				fullUrl: fullUrl,
+			}
+			const customEvent = new CustomEvent('tiwit-add-zoom-image', { 'detail' : detail } );
+			document.dispatchEvent( customEvent );
+		}
+
+		const onZoomTriggerChange = trigger => {
+			setAttributes( {
+				eventTrigger: trigger
+			} );
+			dispatchZoomUpdateEvent( trigger, attributes.fullUrl );
+		};
+
+		// Refresh zoom en every image change on load
+		const imageLoaded = () => {
+			dispatchZoomUpdateEvent( attributes.eventTrigger, attributes.fullUrl );
+		}
+
+		const eventTriggerValues = [
+			{ value: 'mouseover', label: __( 'Mouse over' ) },
+			{ value: 'grab', label: __( 'Grab' ) },
+			{ value: 'click', label: __( 'Click' ) },
+			{ value: 'toggle', label: __( 'Toggle' ) }
+		]
+
+		const eventTrigger = attributes.eventTrigger ? attributes.eventTrigger : 'mouseover'
+
+		return (
+			<figure className={ className }>
+				{focus &&
+				<BlockControls key="controls">
+					<Toolbar>
+						<MediaUpload
+							onSelect={onSelectImage}
+							type="image"
+							value={attributes.id}
+							render={({open}) => (
+								<IconButton
+									onClick={open}
+									className="components-toolbar__control"
+									label={__('Edit image')}
+									icon="edit"
+								/>
+							)}
+						/>
+					</Toolbar>
+
+				</BlockControls>
+				}
+				{ focus &&
+				<InspectorControls key="inspector">
+					<h2>{ __( 'Image Settings' ) }</h2>
+					<SelectControl
+						label={ __( 'Event trigger' ) }
+						value={ eventTrigger }
+						options={ eventTriggerValues }
+						onChange={ onZoomTriggerChange }
+					/>
+				</InspectorControls>
+				}
+				{ ! attributes.id ? (
+
+					<ImagePlaceholder
+						className={ className }
+						key="image-placeholder"
+						icon="format-image"
+						label={ __( 'Image' ) }
+						onSelectImage={ onSelectImage }
+					/>
+
+				) : (
+					<React.Fragment>
+						<img
+							src={ attributes.largeUrl }
+							alt={ attributes.alt }
+							data-full-url={ attributes.fullUrl }
+							data-event={ attributes.eventTrigger }
+							onLoad={ imageLoaded }
+							onClick={ this.onImageClick }
+							ref = { ( elem ) => { zoomElement = elem } }
+						/>
+						{ ( attributes.caption && attributes.caption.length > 0 ) || isSelected ? (
+							<RichText
+								className="wp-caption"
+								tagName="figcaption"
+								placeholder={ __( 'Write caption…' ) }
+								value={ attributes.caption }
+								onFocus={ this.onFocusCaption }
+								onChange={ ( value ) => setAttributes( { caption: value } ) }
+								isSelected={ this.state.captionFocused }
+								inlineToolbar
+							/>
+						) : null }
+					</React.Fragment>
+				)}
+
+			</figure>
+		);
+	}
+}
 
 /**
  * Register: a Gutenberg Block.
@@ -124,130 +296,7 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 	 *
 	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
 	 */
-	edit: props => {
-
-		const { className, attributes, setAttributes, focus } = props
-
-		let zoomElement = null
-
-		const onSelectImage = img => {
-
-			const largeUrl = img.sizes && img.sizes.large ? img.sizes.large.url : img.url
-
-			let newAttributes = {
-				id: img.id,
-				largeUrl: largeUrl,
-				fullUrl: img.url,
-				alt: img.alt,
-			}
-
-			if( img.caption && img.caption !== '' ){
-				newAttributes.caption = img.caption
-			}
-			setAttributes( newAttributes );
-		};
-
-		const dispatchZoomUpdateEvent = function( trigger, fullUrl){
-
-			const detail = {
-				element : zoomElement,
-				trigger : trigger,
-				fullUrl: fullUrl,
-			}
-			const customEvent = new CustomEvent('tiwit-add-zoom-image', { 'detail' : detail } );
-			document.dispatchEvent( customEvent );
-		}
-
-		const onZoomTriggerChange = trigger => {
-			setAttributes( {
-				eventTrigger: trigger
-			} );
-			dispatchZoomUpdateEvent( trigger, attributes.fullUrl );
-		};
-
-		// Refresh zoom en every image change on load
-		const imageLoaded = () => {
-			dispatchZoomUpdateEvent( attributes.eventTrigger, attributes.fullUrl );
-		}
-
-		const eventTriggerValues = [
-			{ value: 'mouseover', label: __( 'Mouse over' ) },
-			{ value: 'grab', label: __( 'Grab' ) },
-			{ value: 'click', label: __( 'Click' ) },
-			{ value: 'toggle', label: __( 'Toggle' ) }
-		]
-
-		const eventTrigger = attributes.eventTrigger ? attributes.eventTrigger : 'mouseover'
-
-		return (
-				<figure className={ className }>
-					{focus &&
-						<BlockControls key="controls">
-							<Toolbar>
-								<MediaUpload
-									onSelect={onSelectImage}
-									type="image"
-									value={attributes.id}
-									render={({open}) => (
-										<IconButton
-											onClick={open}
-											className="components-toolbar__control"
-											label={__('Edit image')}
-											icon="edit"
-										/>
-									)}
-								/>
-							</Toolbar>
-
-						</BlockControls>
-					}
-					{ focus &&
-						<InspectorControls key="inspector">
-							<h2>{ __( 'Image Settings' ) }</h2>
-							<SelectControl
-								label={ __( 'Event trigger' ) }
-								value={ eventTrigger }
-								options={ eventTriggerValues }
-								onChange={ onZoomTriggerChange }
-							/>
-						</InspectorControls>
-					}
-					{ ! attributes.id ? (
-
-						<ImagePlaceholder
-							className={ className }
-							key="image-placeholder"
-							icon="format-image"
-							label={ __( 'Image' ) }
-							onSelectImage={ onSelectImage }
-						/>
-
-					) : (
-						<React.Fragment>
-							<img
-								src={ attributes.largeUrl }
-								alt={ attributes.alt }
-								data-full-url={ attributes.fullUrl }
-								data-event={ attributes.eventTrigger }
-								onLoad={ imageLoaded }
-								ref = { ( elem ) => { zoomElement = elem } }
-							/>
-							{ ( attributes.caption && attributes.caption.length > 0 ) || focus ? (
-								<figcaption>
-									<PlainText
-										className="wp-caption"
-										placeholder={ __( 'Write caption…' ) }
-										value={ attributes.caption }
-										onChange={ ( value ) => setAttributes( { caption: value } ) }
-									/>
-								</figcaption>
-								) : null }
-						</React.Fragment>
-					)}
-
-				</figure>
-		);
-	},
+	edit: TiwitImagesZoom,
 
 	/**
 	 * The save function defines the way in which the different attributes should be combined
