@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: Tiwit image blocks bundle
+ * Plugin Name: TiwiT image blocks bundle
  * Plugin URI: https://tiwit.io
  * Description: Image blocks bundle
- * Author: ArnaudBan
- * Author URI: https://arnaudban.me
+ * Author: TiwiT
+ * Author URI: https://tiwit.io
  * Version: 1.0.0
  * License: GPL2+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt

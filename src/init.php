@@ -42,6 +42,9 @@ function tiwit_image_blocks_bundle_assets() {
 	wp_enqueue_script( 'tiwit-images-zoom', plugins_url( 'src/image-zoom/images-zoom-scripts.js', dirname( __FILE__ ) ), array( 'tiwit-jquery-zoom' ), '1.0', true );
 }
 
+
+add_action( 'enqueue_block_editor_assets', 'tiwit_images_blocks_cgb_editor_assets' );
+
 /**
  * Enqueue Gutenberg block assets for backend editor.
  *
@@ -70,4 +73,3 @@ function tiwit_images_blocks_cgb_editor_assets() {
 } // End function tiwit_images_blocks_cgb_editor_assets().
 
 // Hook: Editor assets.
-add_action( 'enqueue_block_editor_assets', 'tiwit_images_blocks_cgb_editor_assets' );
