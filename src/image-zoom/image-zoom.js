@@ -219,6 +219,9 @@ registerBlockType( 'tiwit-images-bundle/images-zoom', {
 	description: __('Image with a zoom'),
 	icon: 'welcome-view-site', // Block icon from Dashicons → https://developer.wordpress.org/resource/dashicons/.
 	category: 'common', // Block category — Group blocks together based on common traits E.g. common, formatting, layout widgets, embed.
+	keywords: [
+		__( 'tiwit' ),
+	],
 	supports: {
 		html: false
 	},

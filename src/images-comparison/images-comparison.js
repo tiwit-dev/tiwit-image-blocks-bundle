@@ -252,6 +252,10 @@ registerBlockType( 'tiwit-images-bundle/images-comparison', {
 	description: __('Compare two images'),
 	icon: 'welcome-view-site', // Block icon from Dashicons → https://developer.wordpress.org/resource/dashicons/.
 	category: 'common', // Block category — Group blocks together based on common traits E.g. common, formatting, layout widgets, embed.
+	keywords: [
+		__( 'tiwit' ),
+		__( 'slider' ),
+	],
 	supports: {
 		html: false
 	},

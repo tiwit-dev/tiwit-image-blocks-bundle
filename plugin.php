@@ -3,7 +3,7 @@
  * Plugin Name: TiwiT image blocks bundle
  * Plugin URI: https://tiwit.io
  * Description: Image blocks bundle
- * Author: TiwiT
+ * Author: TiwiT, ArnaudBan
  * Author URI: https://tiwit.io
  * Version: 1.0.0
  * License: GPL2+
