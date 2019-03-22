@@ -30,3 +30,7 @@ Demo with the TwentySeventeen theme :
 It use the [Juxtapose library](https://github.com/NUKnightLab/juxtapose) by knightlab.
  
 This project was bootstrapped with [Create Guten Block](https://github.com/ahmadawais/create-guten-block).
+Change on Stackedit.
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTM3NjMxODYyMl19
+-->
